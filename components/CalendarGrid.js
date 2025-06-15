@@ -156,8 +156,8 @@ export default function CalendarGrid({ year, month, tasks }) {
       </div>
       
       {/* Desktop Calendar Days Grid - Fixed 6 rows */}
-      <div className="grid grid-cols-7 grid-rows-6">
-        {allCalendarDays.slice(0, 42).map((dayInfo, index) => (
+      <div className="grid grid-cols-7 grid-rows-5">
+        {allCalendarDays.slice(0, 35).map((dayInfo, index) => (
           <div key={index} className="h-32 border-r border-b border-gray-700 last:border-r-0 [&:nth-child(7n)]:border-r-0">
             <DayCell
               date={dayInfo.date}
