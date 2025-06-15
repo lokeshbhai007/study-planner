@@ -2,26 +2,41 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  
 }
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 1px;
+  background-color: #e5e7eb;
+  border: 1px solid #e5e7eb;
 }
+
+.day-cell {
+  background-color: white;
+  min-height: 120px;
+  padding: 8px;
+}
+
+.day-cell.outside-month {
+  background-color: #f9fafb;
+  color: #9ca3af;
+}
+
+.subject-tag {
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 500;
+  margin: 1px;
+}
+
+.subject-js { background-color: #dbeafe; color: #1e40af; }
+.subject-db { background-color: #dcfce7; color: #166534; }
+.subject-py { background-color: #fef3c7; color: #92400e; }
+.subject-web { background-color: #fce7f3; color: #be185d; }
+.subject-default { background-color: #f3f4f6; color: #374151; }
