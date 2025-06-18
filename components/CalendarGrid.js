@@ -8,10 +8,10 @@ import DayCell from './DayCell'
 
 const WEEKDAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 const WEEKDAYS_SHORT = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
-const MOBILE_WEEKDAYS = ['Yesterday', 'Today', 'Tomorrow'] // 3-day view for mobile
 
 export default function CalendarGrid({ year, month, tasks }) {
   const [isMobile, setIsMobile] = useState(false)
+  const [mobileViewType, setMobileViewType] = useState('next') // 'prev' or 'next'
 
   // Check if screen is mobile
   useEffect(() => {
@@ -77,18 +77,28 @@ export default function CalendarGrid({ year, month, tasks }) {
 
   const allCalendarDays = createCalendarDays()
 
-  // Filter for mobile view (yesterday, today, tomorrow)
+  // Get mobile calendar days based on view type
   const getMobileCalendarDays = () => {
     const today = new Date()
     today.setHours(0, 0, 0, 0)
     
-    const yesterday = new Date(today)
-    yesterday.setDate(today.getDate() - 1)
+    let threeDays = []
     
-    const tomorrow = new Date(today)
-    tomorrow.setDate(today.getDate() + 1)
-    
-    const threeDays = [yesterday, today, tomorrow]
+    if (mobileViewType === 'prev') {
+      // Previous 3 days (day-2, day-1, today)
+      for (let i = 2; i >= 0; i--) {
+        const date = new Date(today)
+        date.setDate(today.getDate() - i)
+        threeDays.push(date)
+      }
+    } else {
+      // Next 3 days (today, day+1, day+2)
+      for (let i = 0; i < 3; i++) {
+        const date = new Date(today)
+        date.setDate(today.getDate() + i)
+        threeDays.push(date)
+      }
+    }
     
     return threeDays.map(date => {
       const isCurrentMonth = date.getMonth() === month - 1 && date.getFullYear() === year
@@ -101,33 +111,78 @@ export default function CalendarGrid({ year, month, tasks }) {
     })
   }
 
-  // Get mobile days (no weeks needed for 3-day view)
-  const getMobileDays = () => {
-    return getMobileCalendarDays()
+  // Get mobile days headers based on view type
+  const getMobileHeaders = () => {
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    
+    if (mobileViewType === 'prev') {
+      return ['2 Days Ago', 'Yesterday', 'Today']
+    } else {
+      return ['Today', 'Tomorrow', 'Day After']
+    }
   }
 
-  const mobileDays = isMobile ? getMobileDays() : []
-
-  // Navigation functions removed - not needed for 3-day view
+  const mobileDays = isMobile ? getMobileCalendarDays() : []
+  const mobileHeaders = isMobile ? getMobileHeaders() : []
 
   if (isMobile) {
     return (
       <div className="bg-gray-800 border border-gray-700 rounded-lg overflow-hidden shadow-xl">
-        {/* Mobile 3-Day Headers (Yesterday, Today, Tomorrow) */}
-        <div className="grid grid-cols-3">
-          {MOBILE_WEEKDAYS.map((day, index) => (
-            <div key={day} className={`bg-gray-900 p-2 text-center font-semibold text-xs border-b border-gray-700 h-10 flex items-center justify-center ${
-              index === 1 ? 'text-blue-300 bg-gray-800' : 'text-gray-200' // Highlight "Today"
-            }`}>
-              {day}
+        {/* Navigation Arrows */}
+        <div className="bg-gray-900 p-3 border-b border-gray-700">
+          <div className="flex items-center justify-between max-w-xs mx-auto">
+            <button
+              onClick={() => setMobileViewType('prev')}
+              className={`p-2 rounded-full transition-all duration-200 ${
+                mobileViewType === 'prev'
+                  ? 'bg-blue-600 text-white shadow-sm'
+                  : 'text-gray-300 hover:text-white hover:bg-gray-700'
+              }`}
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+            
+            <div className="text-gray-200 text-sm font-medium">
+              {mobileViewType === 'prev' ? 'Previous Days' : 'Next Days'}
             </div>
-          ))}
+            
+            <button
+              onClick={() => setMobileViewType('next')}
+              className={`p-2 rounded-full transition-all duration-200 ${
+                mobileViewType === 'next'
+                  ? 'bg-blue-600 text-white shadow-sm'
+                  : 'text-gray-300 hover:text-white hover:bg-gray-700'
+              }`}
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        {/* Mobile 3-Day Headers */}
+        <div className="grid grid-cols-3">
+          {mobileHeaders.map((day, index) => {
+            const isToday = (mobileViewType === 'prev' && index === 2) || 
+                           (mobileViewType === 'next' && index === 0)
+            return (
+              <div key={day} className={`bg-gray-900 p-2 text-center font-semibold text-xs border-b border-gray-700 h-10 flex items-center justify-center ${
+                isToday ? 'text-blue-300 bg-gray-800' : 'text-gray-200'
+              }`}>
+                {day}
+              </div>
+            )
+          })}
         </div>
         
         {/* Mobile Calendar Days Grid (3 columns) */}
         <div className="grid grid-cols-3">
           {mobileDays.map((dayInfo, index) => (
-            <div key={`mobile-${index}`} className="h-40 border-r border-b border-gray-700 last:border-r-0">
+            <div key={`mobile-${mobileViewType}-${index}`} className="h-40 border-r border-b border-gray-700 last:border-r-0">
               <DayCell
                 date={dayInfo.date}
                 fullDate={dayInfo.fullDate}
